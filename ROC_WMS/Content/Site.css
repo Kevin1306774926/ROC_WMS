@@ -1,6 +1,6 @@
 ﻿body {
-    padding-top: 50px;
-    padding-bottom: 20px;
+    margin:0px;
+    padding:0px;
 }
 
 /* Set padding to keep content from hitting the edges */
@@ -20,5 +20,19 @@
 input,
 select,
 textarea {
-    max-width: 280px;
+    max-width: 380px;
+}
+.fitem{
+    margin:6px;
+}
+.fitem label{
+    display:inline-block;
+    width:100px;
+}
+.fitem input{   
+    width:300px;
+    vertical-align:middle;
+}
+.fitem input[type="checkbox"]{
+    width:18px;
 }

@@ -1,31 +1,61 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "首页";
 }
+    <div data-options="region:'north',border:false" style="height: 70px; ">
+        <div>瑞科条码管理系统</div>
+    </div>
+    <div data-options="region:'west',split:true,title:'菜单导航栏'" style="width:230px;">
+        <div id="aa" class="easyui-accordion" data-options="fit:true">
+            <div title="主菜单" data-options="iconCls:'icon-search',selected:true">
+                <ul id="menu"></ul>
+            </div>
+        </div>
+    </div>
+    <div data-options="region:'center'">
+        <div id="tabs" class="easyui-tabs" data-options="fit:true">
+            <div id="home_page" title="首页">
+                欢迎使用瑞科条码管理系统。
+            </div>
+        </div>
+    </div>
+    <div data-options="region:'south'" style="height:25px;padding:1px;">登陆用户：</div>
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            $('#menu').tree({
+                url: '/MenuClass/MenuTree',
+                animate: true,
+                //onLoadSuccess: function () {
+                //    $('#menu').tree('collapseAll');
+                //},
+                onClick: function (node) {
+                    var title = node.text;
+                    if (node.attributes != undefined&&node.attributes.url!=undefined) {
+                        OpenTab(title, node.attributes.url);
+                    }
+                }
+            });
+        });
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+        function OpenTab(title, value) {
+            if ($('#tabs').tabs("exists", title)) {
+                $("#tabs").tabs("select", title);
+            }
+            else {
+                $("#tabs").tabs("add", {
+                    title: title,
+                    closable: true,
+                    content: CreateIFame(value)
+                });
+            }
+        }
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+        function CreateIFame(src) {
+            //var iframe = "<iframe width='100%' height='100%' scrolling='no' frameborder='0' src='" + src + "'></iframe>";
+            var iframe = "<iframe frameborder=0 width='100%' height='99.5%' id='iframepage' name='iframepage' scrolling='no' frameborder='0' src='" + src + "' ></iframe>";
+            return iframe;
+        }
+
+    </script>
+
+}

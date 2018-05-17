@@ -7,6 +7,7 @@ namespace ROC_WMS
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
+            filters.Add(new JsonAttribute());
             filters.Add(new HandleErrorAttribute());
         }
     }

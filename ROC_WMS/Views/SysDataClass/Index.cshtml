@@ -1,0 +1,89 @@
+﻿
+@{
+    ViewBag.Title = "分类数据字典";
+}
+
+<h2>分类数据字典</h2>
+<div class="easyui-pannel" fit="true">
+    <ul id="tt"></ul>
+</div>
+<div id="mm" class="easyui-menu" style="width:120px;">
+    <div onclick="New()" data-options="iconCls:'icon-add'">添加</div>
+    <div onclick="Edit()" data-options="iconCls:'icon-edit'">编辑</div>
+    <div onclick="Delete()" data-options="iconCls:'icon-remove'">删除</div>
+</div>
+
+<div id="dialog" style="overflow:hidden"></div>
+
+@section scripts{
+    <script>
+        $(function () {
+            $('#tt').tree({
+                url: '/SysDataClass/List/Menu',
+                animate: true,
+                lines: true,
+                loadFilter: function (rows) {
+                    return TreeConvert(rows);
+                },
+                onContextMenu: function (e, node) {
+                    e.preventDefault();
+                    $(this).tree('select', node.target);
+                    $('#mm').menu('show', { left: e.pageX, top: e.pageY });
+                },
+            });
+        });
+
+        function New() {
+            var title = "添加";
+            var node = $('#tt').tree('getSelected');
+            if (node) {
+                var url = '/SysDataClass/create/' + node.id
+                OpenIFame(title, url, function () {
+                    $('#tt').tree('reload');
+                    $('#tt').tree('scrollTo', node.target);
+                });
+            }
+        }
+
+        function Edit() {
+            var title = "编辑";
+            var node = $('#tt').tree('getSelected');
+            if (node) {
+                var url = '/SysDataClass/edit/' + node.attributes.Id
+                OpenIFame(title, url, function () {
+                    $('#tt').tree('reload');
+                    $('#tt').tree('scrollTo', node.target);
+                });
+            }
+        }
+        function Delete() {
+            var node = $('#tt').tree('getSelected')
+            if (node) {
+                $.messager.confirm('警告', '你确定要删除该记录吗?', function (r) {
+                    if (r) {
+                        $.post('/SysDataClass/Delete', { id: node.attributes.Id }, function (result) {
+                            var result = eval('(' + result + ')');
+                            if (result.Success) {
+                                $.messager.show({
+                                    msg: result.Message,
+                                });
+                                //$('#dg').datagrid('reload');
+                                $('#tt').tree('remove', node.target);
+                            }
+                            else {
+                                $.messager.show({
+                                    title: 'Error',
+                                    msg: result.Message
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+
+
+

@@ -1,0 +1,200 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<table id="dg"></table>
+<div id="dlg" class="easyui-dialog" style="width:500px;height:380px;padding:10px" closed="true" buttons="#dlg-buttons">
+    <div class="ftitle">@ViewBag.FormTitle</div>
+    <form id="fm" method="post" nvalidate>
+         <input name="Id" hidden />
+        <div class="fitem">            
+            <label>编号：</label><input name="Code" class="easyui-textbox" required="true" />
+        </div>                
+
+        <div class="fitem">            
+            <label>名称：</label><input name="Name" class="easyui-textbox" required="true" />
+        </div>                
+
+        <div class="fitem">            
+            <label>密码：</label><input name="Password" class="easyui-textbox" type="password" required="true" />
+        </div>                
+      
+        <div class="fitem">
+            <label>是否停用：</label>
+            <input name="IsStop" type="checkbox" value="true"/>
+            <input name="IsStop" type="hidden" value="false" checked="checked" />
+        </div>
+        @*<div class="fitem">            
+            <label>操作员：</label><input name="Operator" class="easyui-textbox" required="true" />
+        </div>                
+
+         <div class="fitem">            
+            <label>时间：</label><input name="OpTime" class="easyui-datetimebox" required="true" data-options="parser:DatetimeParser" />
+         </div>*@
+        
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="Save()" style="width:90px">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">取消</a>
+</div>
+
+@section scripts{    
+<script type="text/javascript">
+    var URL;
+
+    $(function () {
+        $('#dg').datagrid(
+        {
+            url: '/User/List',
+            method: 'post',
+            singleSelect:true,
+            rownumbers: true,
+            pagination: true,
+            fit: true,
+            striped: true,
+            showFooter: true,
+            sortName: 'Id',
+            sortOrder: 'desc',
+            columns: [[
+                { title: 'Id', field: 'Id', width: 80, align: 'center', sortable: true,hidden:true},
+                { title: '编号', field: 'Code', width: 120,align: 'left',  sortable: true,},
+                { title: '名称', field: 'Name', width: 120,align: 'left',  sortable: true,},
+                //{ title: '密码', field: 'Password', width: 120,align: 'left',  sortable: true,},
+                {
+                    title: '是否停用', field: 'IsStop', width: 80, align: 'center',
+                    formatter: function (val, row) {
+                        return val == true ? '<input  type="checkbox" checked="true" disabled="true"/>' : '<input  type="checkbox" disabled="true"/>';
+                    }
+                },
+                { title: '操作员', field: 'Operator', width: 120,align: 'left',  sortable: true,},
+                { title: '时间', field: 'OpTime', width: 200,align: 'center',  sortable: true, formatter:DateTimeFormatter},
+
+            ]],
+             loadFilter:function(data){
+                if(data.Data)
+                {
+                    return data.Data;
+                }
+                else
+                {
+                    return data;
+                }
+            },
+            toolbar: [
+            {
+                id: 'btnreload',
+                text: '刷新',
+                iconCls: 'icon-reload',
+                handler: function () {
+                    $('#dg').datagrid('reload');
+                }
+            },
+            {
+                id: 'btncreate',
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    $('#btnsave').linkbutton('enable');
+                    Create('/User/Create');
+                }
+            },
+            {
+                id: 'btnedit',
+                text: '修改',
+                iconCls: 'icon-edit',
+                handler: function () {
+                    $('#btnedit').linkbutton('enable');
+                    Edit('/User/Edit');
+                }
+            }, '-',
+            {
+                id: 'btndetele',
+                text: '删除',
+                iconCls: 'icon-cancel',
+                handler: function () {
+                    Delete('/User/Delete');
+                }
+            }
+            ]
+
+        });
+    });
+
+    function Create(url) {
+        $('#dlg').dialog('open').dialog('setTitle', '添加');
+        $('#fm').form('clear');
+        URL=url;
+    }
+
+    function Edit(url) {
+        var row = $('#dg').datagrid('getSelected');
+        if(row)
+        {
+            $('#dlg').dialog('open').dialog('setTitle', '编辑');
+            //$('#fm').form('clear');
+            $('#fm').form('load', row);
+            URL =url;
+        }
+    }
+
+    function Delete(url) {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('警告', '你确定要删除该记录吗？', function (r) {
+                if (r) {
+                    $.post(url, row, function (result) {
+                        result = eval('(' + result + ')');
+                        if (result.Success)
+                        {
+                            $('#dg').datagrid('reload');                            
+                        }
+                        else
+                        {
+                            $.messager.show({
+                                title: 'Error',
+                                msg: result.Message
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    function Save() {
+        $('#fm').form('submit', {
+            url: URL,
+            onSubmit: function () {
+                var flag = $(this).form('validate');
+                if (flag) {
+                    ShowProcess(true, '温馨提示', '正在提交数据...');
+                }
+                return flag;
+            },
+            success: function (result) {
+                ShowProcess(false);
+                var result = eval('(' + result + ')');
+                if (result.Success)
+                {
+                    $('#dlg').dialog('close');
+                    $('#dg').datagrid('reload');                            
+                }
+                else
+                {
+                    $.messager.show({
+                        title: 'Error',
+                        msg: result.Message
+                    });
+                }               
+            },
+            onLoadError: function () {
+                ShowProcess(false);
+                $.messager.alert('温馨提示', '由于网络或服务器繁忙，提交失败，请重试!');
+            }
+        });
+    }
+
+</script>    
+}
